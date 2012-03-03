@@ -4,7 +4,6 @@
 
 require 'spec_helper'
 
-
 def receive(post, opts)
   sender = opts.fetch(:from)
   receiver = opts.fetch(:by)
@@ -57,7 +56,6 @@ describe "attack vectors" do
   let(:alices_aspect) { alice.aspects.find_by_name("generic") }
 
   context "testing side effects of validation phase" do
-
     describe 'Contact Required Unless Request' do
       #CUSTOM SETUP; cant use helpers here
       it 'does not save a post from a non-contact as a side effect' do
