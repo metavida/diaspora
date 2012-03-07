@@ -5,7 +5,7 @@ class Diaspora::Federated::Validator::Private
 
   validate :relayable_object_has_parent
   validate :contact_required
-  validate :xml_author_matchs_a_known_party
+  validate :sender_is_someone_who_has_authority_of_the_post
   validate :model_is_valid?
 
   def initialize(salmon, user, sender)
@@ -21,6 +21,7 @@ class Diaspora::Federated::Validator::Private
     if self.valid?
       object 
     else
+      #this is a hack to make tests pass for now
       raise self.errors.full_messages.join
       FEDERATION_LOGGER.info("Failed Private Receive: #{self.errors.inspect}")
       nil
@@ -43,13 +44,13 @@ class Diaspora::Federated::Validator::Private
     end
   end
 
-  #if the current receiveing user is the owner of the parent post, you know about the commenter, so proceeded
-  #if you dont own the post, assume the xml_author is the author of the parent post, as that is the person who
-  #is going to be sending you the comment
-  def known_party
+  # the diaspora handle of the person we expect to be sending us the message
+  # if it is a relayable, the parent author is sending us the object
+  # otherwise, it is the author of the thing itself(duh)
+  def expected_object_authority
     if object.respond_to?(:relayable?)
       #if A and B are friends, and A sends B a comment from C, we delegate the validation to the owner of the post being commented on
-      user.owns?(object.parent) ? object.diaspora_handle : object.parent.author.diaspora_handle
+      user.owns?(object.parent) ? object.diaspora_handle : object.parent.author.diaspora_handle #is this just trying save queries?
     else
       object.diaspora_handle
     end
@@ -65,19 +66,19 @@ class Diaspora::Federated::Validator::Private
 
   def contact_required
     unless object.is_a?(Request) || user.contact_for(sender).present?
-      errors.add :base, "Contact Required to receive object."
+      errors.add :base, "Contact required to receive object."
     end
   end
 
-  def xml_author_matchs_a_known_party
-    unless object.author.diaspora_handle == known_party
-      errors.add :base, "XML author does not match a known party."
+  def sender_is_someone_who_has_authority_of_the_post
+    unless sender.diaspora_handle == expected_object_authority
+      errors.add :base, "Message sent from someone who does not have write access to the object"
     end
   end
 
   def model_is_valid?
     unless object.valid?
-      errors.add :object, "Invalid Object: #{object.errors.full_messages.join}"
+      errors.add :object, "#{object.class}: {object.errors.full_messages.join(', ')}"
     end
   end
 end

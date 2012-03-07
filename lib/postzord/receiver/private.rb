@@ -40,16 +40,22 @@ class Postzord::Receiver::Private < Postzord::Receiver
   #called from local code paths only, so we dont need to do all the validation checks
   def parse_and_receive(xml)
     self.object = create_object_from_local(xml)
+    receive_object
+ end
+
+  #this is a method to get the tests to pass
+  # it is used where we manaully pass an already parsed object into be received
+  def receive_object
     obj = accept_object_for_user
     # post_receive_hooks(obj)
   end
+
 
   # @return [Object]
   def accept_object_for_user
     begin
     obj = object.receive(@user, object.author)
-    rescue Exception => e
-      puts @object.inspect
+    rescue => e
       raise e
     end
     FEDERATION_LOGGER.info("user:#{@user.id} successfully received private post from person#{@sender.guid} #{@object.inspect}")

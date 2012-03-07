@@ -49,15 +49,15 @@ describe Diaspora::Federated::Validator::Private do
       it 'adds an error the associated model is not valid' do
         #setup: the model parsed is not valid on its own accord
         @validator.object.stub(:valid?).and_return false
-        only_error_message_should_include /Invalid Object/
+        only_error_message_should_include /Object/
       end
     end
 
     describe '#xml_author_matches_a_known_party' do
       it 'adds an error message if the object is not the same as the known party' do
         #setup: the known party is not the author of the parsed post
-        @validator.stub(:known_party => "dog@bountyhunter.com")
-        only_error_message_should_include /XML author does not match a known party/
+        @validator.stub(:expected_object_authority => "dog@bountyhunter.com")
+        only_error_message_should_include /does not have write access/
       end
     end
 
