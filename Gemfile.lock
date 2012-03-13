@@ -328,6 +328,7 @@ GEM
     redis (2.2.2)
     redis-namespace (1.0.3)
       redis (< 3.0.0)
+    remotipart (1.0.2)
     resque (1.19.0)
       multi_json (~> 1.0)
       redis-namespace (~> 1.0.2)
@@ -493,6 +494,7 @@ DEPENDENCIES
   rails (= 3.0.11)
   rails-i18n
   redcarpet (= 2.0.1)
+  remotipart (~> 1.0)
   resque (= 1.19.0)
   resque-ensure-connected!
   resque-timeout (= 1.0.0)
